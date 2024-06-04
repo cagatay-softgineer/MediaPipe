@@ -20,7 +20,7 @@
  1. Clone this repository:
 
  ```
- git clone https://github.com/yourusername/your-repository.git
+ git clone https://github.com/cagatay-softgineer/MediaPipe.git
  ```
 
  2. Install the required libraries:
