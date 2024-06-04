@@ -32,7 +32,7 @@
 # Usage
  - Place your video files in the `videos` directory.
  - Run the `main.py` script.
- -- Or write your own script:
+ - Or write your own script:
  
  ```
  from modelUsageTests import useMediaPipe
