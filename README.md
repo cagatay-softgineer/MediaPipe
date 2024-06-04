@@ -30,9 +30,9 @@
  ```
 
 # Usage
- 1. Place your video files in the `videos` directory.
- 2.1 Run the `main.py` script.
- 2.2. Or write your own script:
+ - 1. Place your video files in the `videos` directory.
+ - 2.1. Run the `main.py` script.
+ - 2.2. Or write your own script:
  
  ```
  from modelUsageTests import useMediaPipe
