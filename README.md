@@ -31,17 +31,20 @@
 
 # Usage
  1. Place your video files in the `videos` directory.
- 2. Run the `useMediaPipe.py` script:
-
+ 2.1 Run the `main.py` script.
+ 2.2. Or write your own script:
+ 
  ```
- python useMediaPipe.py
+ from modelUsageTests import useMediaPipe
+
+ useMediaPipe("videos/Test.mp4")
  ```
 
  3. Press 'q' to exit the program.
 
 # Customization
  - You can customize the screen width and height in the `useMediaPipe` function to adjust the size of the displayed frames.
- - Additional customization can be done by modifying the code in `useMediaPipe.py` according to your requirements.
+ - Additional customization can be done by modifying the code in `modelUsageTests.py` according to your requirements.
 
 # License
  This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
