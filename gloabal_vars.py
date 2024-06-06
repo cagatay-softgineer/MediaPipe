@@ -1,0 +1,14 @@
+GAP = None
+ROT = None
+NOD = None
+TURN = None
+BLINKR = None
+BLINKL = None
+EYE_L_H = None
+EYE_R_H = None
+EYE_L_V = None
+EYE_R_V = None
+ED_R_H = None
+ED_R_V = None
+ED_L_H = None
+ED_L_V = None

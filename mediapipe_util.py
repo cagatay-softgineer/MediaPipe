@@ -1,6 +1,7 @@
 import mediapipe as mp
 from calculations import eDist, get_nodturn
 import lm_indices as ids
+import gloabal_vars as G_var
 import json # for messages
 import asyncio
 import websocket_util
@@ -9,6 +10,7 @@ from util import parse_landmarks_data_with_regex,extract_coordinates_with_max_po
 
 
 # Initialize MediaPipe Hand module
+mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 mp_hands = mp.solutions.hands
 mp_face = mp.solutions.face_mesh
@@ -17,7 +19,6 @@ pose = mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5, min_t
 hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
 # Initialize MediaPipe drawing module
-mp_drawing = mp.solutions.drawing_utils
 
 def detect_process(process_frame, output_frame, Send2WSS=False):
     """
@@ -47,7 +48,6 @@ def detect_process(process_frame, output_frame, Send2WSS=False):
     pose_results = pose.process(process_frame)
     hand_results = hands.process(process_frame)
     
-    
     img_h, img_w, img_c = process_frame.shape
     if results.multi_face_landmarks:
       for face_landmarks in results.multi_face_landmarks:
@@ -55,40 +55,40 @@ def detect_process(process_frame, output_frame, Send2WSS=False):
         if face_landmarks:
             # Calculate how big is gap between lips
             #gap = abs(face_landmarks.landmark[ids.lips_upper].y - face_landmarks.landmark[ids.lips_bottom].y)
-            gap = eDist(face_landmarks.landmark[ids.lips_upper], face_landmarks.landmark[ids.lips_bottom])
+            G_var.GAP = eDist(face_landmarks.landmark[ids.lips_upper], face_landmarks.landmark[ids.lips_bottom])
 
             # Calculate head Nod and Turn
-            nod, turn = get_nodturn(face_landmarks.landmark, img_w, img_h)
+            G_var.NOD, G_var.TURN = get_nodturn(face_landmarks.landmark, img_w, img_h)
 
             # Calculate head rotation
-            rot = face_landmarks.landmark[ids.face_upper].x - face_landmarks.landmark[ids.face_bottom].x
+            G_var.ROT = face_landmarks.landmark[ids.face_upper].x - face_landmarks.landmark[ids.face_bottom].x
 
             # Calculate Blinking
-            ed_R_h = eDist(face_landmarks.landmark[ids.eye_right_right], face_landmarks.landmark[ids.eye_right_left])
-            ed_R_v = eDist(face_landmarks.landmark[ids.eye_right_upper], face_landmarks.landmark[ids.eye_right_bottom])
-            blinkR = ed_R_v/ed_R_h
-            ed_L_h = eDist(face_landmarks.landmark[ids.eye_left_right], face_landmarks.landmark[ids.eye_left_left])
-            ed_L_v = eDist(face_landmarks.landmark[ids.eye_left_upper], face_landmarks.landmark[ids.eye_left_bottom])
-            blinkL = ed_L_v/ed_L_h
+            G_var.ED_R_H = eDist(face_landmarks.landmark[ids.eye_right_right], face_landmarks.landmark[ids.eye_right_left])
+            G_var.ED_R_V = eDist(face_landmarks.landmark[ids.eye_right_upper], face_landmarks.landmark[ids.eye_right_bottom])
+            G_var.BLINKR = G_var.ED_R_V/G_var.ED_R_H
             
-            eye_L_h = eDist(face_landmarks.landmark[ids.iris_left], face_landmarks.landmark[ids.eye_left_left]) / eDist(face_landmarks.landmark[ids.eye_left_right], face_landmarks.landmark[ids.eye_left_left])
+            G_var.ED_L_H = eDist(face_landmarks.landmark[ids.eye_left_right], face_landmarks.landmark[ids.eye_left_left])
+            G_var.ED_L_V = eDist(face_landmarks.landmark[ids.eye_left_upper], face_landmarks.landmark[ids.eye_left_bottom])
+            G_var.BLINKL = G_var.ED_L_V/G_var.ED_L_H
+            
+            G_var.EYE_L_H = eDist(face_landmarks.landmark[ids.iris_left], face_landmarks.landmark[ids.eye_left_left]) / eDist(face_landmarks.landmark[ids.eye_left_right], face_landmarks.landmark[ids.eye_left_left])
 
+            G_var.EYE_R_H = eDist(face_landmarks.landmark[ids.iris_right], face_landmarks.landmark[ids.eye_right_left]) / eDist(face_landmarks.landmark[ids.eye_right_right], face_landmarks.landmark[ids.eye_right_left])
 
-            eye_R_h = eDist(face_landmarks.landmark[ids.iris_right], face_landmarks.landmark[ids.eye_right_left]) / eDist(face_landmarks.landmark[ids.eye_right_right], face_landmarks.landmark[ids.eye_right_left])
+            G_var.EYE_L_V = eDist(face_landmarks.landmark[ids.iris_left], face_landmarks.landmark[ids.eye_left_bottom]) / eDist(face_landmarks.landmark[ids.eye_left_upper], face_landmarks.landmark[ids.eye_left_bottom])
 
-            eye_L_v = eDist(face_landmarks.landmark[ids.iris_left], face_landmarks.landmark[ids.eye_left_bottom]) / eDist(face_landmarks.landmark[ids.eye_left_upper], face_landmarks.landmark[ids.eye_left_bottom])
-
-            eye_R_v = eDist(face_landmarks.landmark[ids.iris_right], face_landmarks.landmark[ids.eye_right_bottom]) / eDist(face_landmarks.landmark[ids.eye_right_upper], face_landmarks.landmark[ids.eye_right_bottom])
+            G_var.EYE_R_V = eDist(face_landmarks.landmark[ids.iris_right], face_landmarks.landmark[ids.eye_right_bottom]) / eDist(face_landmarks.landmark[ids.eye_right_upper], face_landmarks.landmark[ids.eye_right_bottom])
 
             #Draw each face landmark
             mp_drawing.draw_landmarks(
-                output_frame, face_landmarks, mp_face.FACEMESH_TESSELATION)
+                output_frame, face_landmarks, mp_face.FACEMESH_TESSELATION,landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0)))
 
 
     # Draw pose landmarks on the frame
     if pose_results.pose_landmarks:
         mp_drawing.draw_landmarks(
-            output_frame, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+            output_frame, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS,landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0)))
         
     Left_Hand_landmarks = [None]
     Right_Hand_landmarks = [None]
@@ -117,19 +117,19 @@ def detect_process(process_frame, output_frame, Send2WSS=False):
     output_frame = draw_circle_on_coord(output_frame,Right_Hands_landmark_coordinates,COLOR_DOTS=(0, 0, 255))
     
     data = {
-    'gap': gap, 
-    'rot': rot, 
-    'nod': nod, 
-    'turn': turn, 
-    'blinkR': blinkR, 
-    'blinkL': blinkL,
-    'eye_L_H': eye_L_h,
-    'eye_R_H': eye_R_h,
-    'eye_L_V': eye_L_v,
-    'eye_R_V': eye_R_v
+    'gap': G_var.GAP, 
+    'rot': G_var.ROT, 
+    'nod': G_var.NOD, 
+    'turn': G_var.TURN, 
+    'blinkR': G_var.BLINKR, 
+    'blinkL': G_var.BLINKR,
+    'eye_L_H': G_var.EYE_L_H,
+    'eye_R_H': G_var.EYE_R_H,
+    'eye_L_V': G_var.EYE_L_V,
+    'eye_R_V': G_var.EYE_R_V
     }
     
-    if results.multi_face_landmarks and pose_results.pose_landmarks and hand_results.multi_hand_landmarks and Send2WSS:
+    if Send2WSS:
         landmark_coordinates = {}
         len_hand_constants_names = len(ids.hand_constants_names)-1
         # Iterate over all possible landmarks

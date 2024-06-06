@@ -1,7 +1,7 @@
 # MediaPipe Hand, Pose, and Face Detection
 
  This project demonstrates the usage of MediaPipe for hand, pose, and face detection in videos.
- 
+
 # Language Stats:
 
 - Python: 35449 bytes
@@ -31,7 +31,7 @@
  1. Clone this repository:
 
  ```
- git clone https://github.com/cagatay-softgineer/MediaPipe.git
+ git clone https://github.com/yourusername/your-repository.git
  ```
 
  2. Install the required libraries:
@@ -41,14 +41,11 @@
  ```
 
 # Usage
- - Place your video files in the `videos` directory.
- - Run the `main.py` script.
- - Or write your own script:
- 
- ```
- from modelUsageTests import useMediaPipe
+ 1. Place your video files in the `videos` directory.
+ 2. Run the `useMediaPipe.py` script:
 
- useMediaPipe("videos/Test.mp4")
+ ```
+ python useMediaPipe.py
  ```
 
  3. Press 'q' to exit the program.
@@ -56,18 +53,14 @@
 # WebSocket Usage
  1. Start the WebSocket Server:
 
-  - Navigate to the WebSocketServer folder.
-  
-  - Run the batch file to start the WebSocket server.
+  -Navigate to the WebSocketServer folder.
+  -Run the batch file to start the WebSocket server.
+ 2. Add `Send2WSS=True` to:
+  - useMediaPipe("videos/Test.mp4",Send2WSS=True)
 
- 2. Add `Send2WSS=True` to `useMediaPipe(params)`:
-    
- ```
-  useMediaPipe("videos/Test.mp4",Send2WSS=True)
- ```
 # Customization
  - You can customize the screen width and height in the `useMediaPipe` function to adjust the size of the displayed frames.
- - Additional customization can be done by modifying the code in `modelUsageTests.py` according to your requirements.
+ - Additional customization can be done by modifying the code in `useMediaPipe.py` according to your requirements.
 
 # License
  This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
