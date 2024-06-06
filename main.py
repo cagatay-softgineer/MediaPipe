@@ -1,3 +1,3 @@
 from modelUsageTests import useMediaPipe
 
-useMediaPipe("videos\isaretdilisozlugu.com/hikaye.mp4")
+useMediaPipe("test_media/video.mp4")
