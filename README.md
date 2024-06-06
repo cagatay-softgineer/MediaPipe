@@ -8,7 +8,8 @@
 - HTML: 2905 bytes
 - Jupyter Notebook: 691 bytes
 - Batchfile: 22 bytes
-### Total Size Of Project : 4524 kilobytes
+### Total Size Of Project : 4559 kilobytes
+### Total Lines Of Code : 911
 
 # End of Language Stats
 
