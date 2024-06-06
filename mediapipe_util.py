@@ -124,7 +124,7 @@ def detect_process(process_frame, output_frame, Send2WSS=False):
     cv2.circle(output_frame, (Lhw_x,Lhw_y), 15, (255, 0, 0), 2)
     cv2.circle(output_frame, (Rhw_x,Rhw_y), 15, (0, 0, 255), 2)
     
-    if face_landmarks and results.multi_face_landmarks and pose_results.pose_landmarks and hand_results.multi_hand_landmarks and Send2WSS:
+    if results.multi_face_landmarks and pose_results.pose_landmarks and hand_results.multi_hand_landmarks and Send2WSS:
         msg = json.dumps({
                 'gap': gap, 
                 'rot': rot, 
