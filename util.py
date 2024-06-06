@@ -2,6 +2,7 @@ import os
 import subprocess
 import cv2
 import re
+import lm_indices as ids
 
 # Function to resize image while maintaining aspect ratio
 def resize_to_fullscreen(image, screen_width, screen_height):
@@ -215,3 +216,33 @@ def extract_coordinates(landmark):
     y_coord = landmark['y']
     z_coord = landmark['z']
     return x_coord, y_coord, z_coord
+
+def extract_coordinates_with_max_possible(landmark):
+    landmark_coordinates = []
+    max_landmark_index = max(ids.hand_constants)
+    num_landmarks = len(landmark)
+    
+    
+    for i in range(min(num_landmarks, max_landmark_index + 1)):
+        if i in ids.hand_constants:
+            x, y, z = 0, 0, 0  # Default values if landmark not present
+            if i < len(landmark) and landmark[i] is not None:  # Check if the landmark is not None
+                x, y, z = extract_coordinates(landmark[i])
+            landmark_coordinates.append((x, y, z))
+    return landmark_coordinates
+
+def draw_circle_on_coord(input_frame,landmark_coordinates,COLOR_DOTS):
+    output_frame = input_frame.copy()
+    num_landmarks = len(landmark_coordinates)
+    for constant in ids.hand_constants:
+        if constant < num_landmarks:
+            # Get the coordinates of the current constant
+            coordinates = landmark_coordinates[constant]
+            if coordinates is not None:
+                x = coordinates[ids.X]
+                y = coordinates[ids.Y]
+                # Check if both x and y coordinates are not None
+                if x is not None and y is not None:
+                    # Draw a circle
+                    cv2.circle(output_frame, (int(x*input_frame.shape[ids.W]), int(y*input_frame.shape[ids.H])), 15, COLOR_DOTS, 2)
+    return output_frame

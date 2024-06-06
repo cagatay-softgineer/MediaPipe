@@ -5,8 +5,8 @@ import json # for messages
 import asyncio
 import websocket_util
 from test_hand import classify_hands_with_hand_lanmarks
-from util import parse_landmarks_data_with_regex,extract_coordinates
-import cv2
+from util import parse_landmarks_data_with_regex,extract_coordinates_with_max_possible,draw_circle_on_coord
+
 
 # Initialize MediaPipe Hand module
 mp_pose = mp.solutions.pose
@@ -109,41 +109,51 @@ def detect_process(process_frame, output_frame, Send2WSS=False):
                         output_frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2))
                     Right_Hand_landmarks = parse_landmarks_data_with_regex([f"{hand_landmarks}"])
                     
-    if Left_Hand_landmarks[0] is not None:
-        Lhw_x,Lhw_y,Lhw_z = extract_coordinates(Left_Hand_landmarks[0])
-    else:
-        Lhw_x,Lhw_y,Lhw_z = 0,0,0
-    if Right_Hand_landmarks[0] is not None:
-        Rhw_x,Rhw_y,Rhw_z = extract_coordinates(Right_Hand_landmarks[0])
-    else:
-        Rhw_x,Rhw_y,Rhw_z = 0,0,0    
-        
-    Lhw_x,Lhw_y,Lhw_z = int(Lhw_x*img_w),int(Lhw_y*img_h),Lhw_z
-    Rhw_x,Rhw_y,Rhw_z = int(Rhw_x*img_w),int(Rhw_y*img_h),Rhw_z
+
     
-    cv2.circle(output_frame, (Lhw_x,Lhw_y), 15, (255, 0, 0), 2)
-    cv2.circle(output_frame, (Rhw_x,Rhw_y), 15, (0, 0, 255), 2)
+    Left_Hands_landmark_coordinates = extract_coordinates_with_max_possible(Left_Hand_landmarks)
+    Right_Hands_landmark_coordinates = extract_coordinates_with_max_possible(Right_Hand_landmarks)
+    output_frame = draw_circle_on_coord(output_frame,Left_Hands_landmark_coordinates,COLOR_DOTS=(255, 0, 0))
+    output_frame = draw_circle_on_coord(output_frame,Right_Hands_landmark_coordinates,COLOR_DOTS=(0, 0, 255))
+    
+    data = {
+    'gap': gap, 
+    'rot': rot, 
+    'nod': nod, 
+    'turn': turn, 
+    'blinkR': blinkR, 
+    'blinkL': blinkL,
+    'eye_L_H': eye_L_h,
+    'eye_R_H': eye_R_h,
+    'eye_L_V': eye_L_v,
+    'eye_R_V': eye_R_v
+    }
     
     if results.multi_face_landmarks and pose_results.pose_landmarks and hand_results.multi_hand_landmarks and Send2WSS:
-        msg = json.dumps({
-                'gap': gap, 
-                'rot': rot, 
-                'nod': nod, 
-                'turn': turn, 
-                'blinkR': blinkR, 
-                'blinkL': blinkL,
-                'eye_L_H': eye_L_h,
-                'eye_R_H': eye_R_h,
-                'eye_L_V': eye_L_v,
-                'eye_R_V': eye_R_v,
-                'Left_Hand_Wrist_Pos': f"{Lhw_x} | {Lhw_y} | {Lhw_z}",
-                'Right_hand_Wrist_Pos': f"{Rhw_x} | {Rhw_y} | {Rhw_z}"
-                }) # Velmi to taha dole FPS
+        landmark_coordinates = {}
+        len_hand_constants_names = len(ids.hand_constants_names)-1
+        # Iterate over all possible landmarks
+        for landmark_id in ids.hand_constants:
+            # Check if the landmark is available for left and right hands
+            left_hand_coordinate = Left_Hands_landmark_coordinates[landmark_id] if landmark_id < len(Left_Hands_landmark_coordinates) else None
+            right_hand_coordinate = Right_Hands_landmark_coordinates[landmark_id] if landmark_id < len(Right_Hands_landmark_coordinates) else None
+
+            # Add the coordinates to the landmark_coordinates dictionary
+            landmark_coordinates[f"Left_Hand_{ids.hand_constants_names[min(landmark_id,len_hand_constants_names)]}_Pose"] = left_hand_coordinate
+            landmark_coordinates[f"Right_Hand_{ids.hand_constants_names[min(landmark_id,len_hand_constants_names)]}_Pose"] = right_hand_coordinate
+
+        # Add the landmark coordinates to the data dictionary
+        data.update(landmark_coordinates)
+
+        # Prepare the JSON message with all data
+        msg = json.dumps(data) # Velmi to taha dole FPS
 
         # Send data to ws server
+
         try:
           asyncio.run(websocket_util.send(msg))
         except ConnectionRefusedError:
           print('WS Server is down')
+
                 
     return output_frame
