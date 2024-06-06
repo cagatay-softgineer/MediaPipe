@@ -45,9 +45,9 @@
 # WebSocket Usage
  1. Start the WebSocket Server:
 
-  -Navigate to the WebSocketServer folder.
+  - Navigate to the WebSocketServer folder.
   
-  -Run the batch file to start the WebSocket server.
+  - Run the batch file to start the WebSocket server.
 
  2. Add `Send2WSS=True` to:
 
