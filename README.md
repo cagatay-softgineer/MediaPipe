@@ -49,7 +49,7 @@
   
   - Run the batch file to start the WebSocket server.
 
- 2. Add `Send2WSS=True` to:
+ 2. Add `Send2WSS=True` to `useMediaPipe(params)`:
     
  ```
   useMediaPipe("videos/Test.mp4",Send2WSS=True)
