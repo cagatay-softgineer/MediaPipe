@@ -10,7 +10,7 @@
 - Batchfile: 22 bytes
 
 
-# - Total Size Of Project : 4524 kilobytes
+# Total Size Of Project : 4524 kilobytes
 
 ### End of Language Stats
 
