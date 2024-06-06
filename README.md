@@ -2,17 +2,15 @@
 
  This project demonstrates the usage of MediaPipe for hand, pose, and face detection in videos.
  
-### Language Stats:
+# Language Stats:
 
 - Python: 35449 bytes
 - HTML: 2905 bytes
 - Jupyter Notebook: 691 bytes
 - Batchfile: 22 bytes
+### Total Size Of Project : 4524 kilobytes
 
-
-- Total Size Of Project : 4524 kilobytes
-
-### End of Language Stats
+# End of Language Stats
 
 # Features
 
