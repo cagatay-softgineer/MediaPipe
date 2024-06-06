@@ -42,6 +42,16 @@
 
  3. Press 'q' to exit the program.
 
+# WebSocket Usage
+ 1. Start the WebSocket Server:
+
+  -Navigate to the WebSocketServer folder.
+  -Run the batch file to start the WebSocket server.
+
+ 2. Add `Send2WSS=True` to:
+
+  - useMediaPipe("videos/Test.mp4",Send2WSS=True)
+
 # Customization
  - You can customize the screen width and height in the `useMediaPipe` function to adjust the size of the displayed frames.
  - Additional customization can be done by modifying the code in `modelUsageTests.py` according to your requirements.

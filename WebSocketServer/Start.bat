@@ -1,0 +1,2 @@
+python websoc.py
+pause

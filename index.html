@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Animation</title>
+    <!-- Include Three.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="dataDisplay"></div>
+    <!-- Container for displaying incoming data -->
+    <script>
+        // Create a WebSocket connection
+        const socket = new WebSocket('ws://localhost:8765');
+
+        // Function to handle messages from the WebSocket server
+        socket.onmessage = function(event) {
+            // Parse JSON data received from the server
+            const data = JSON.parse(event.data);
+
+            // Update the animation of the 3D model based on the received data
+            animateModel(data);
+
+            // Display the incoming data at the bottom of the page
+            displayIncomingData(data);
+        };
+
+        // Function to animate the 3D model
+        function animateModel(data) {
+            // Access data properties and update the 3D model accordingly
+            // Example:
+            // const gap = data.gap;
+            // const rot = data.rot;
+            // Update 3D model based on the received data
+        }
+
+        // Function to display incoming data at the bottom of the page
+        function displayIncomingData(data) {
+            const dataDisplay = document.getElementById('dataDisplay');
+            // Clear previous data
+            dataDisplay.innerHTML = '';
+
+            // Create a list of key-value pairs and append it to the container
+            const dataList = document.createElement('ul');
+            for (const [key, value] of Object.entries(data)) {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${key}: ${value}`;
+                dataList.appendChild(listItem);
+            }
+            dataDisplay.appendChild(dataList);
+        }
+
+        // Initialize Three.js scene and 3D model
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({
+            canvas: document.getElementById('canvas')
+        });
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({
+            color: 0x00ff00
+        });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+        camera.position.z = 5;
+
+        // Function to render the scene
+        function animate() {
+            requestAnimationFrame(animate);
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
+</body>
+
+</html>

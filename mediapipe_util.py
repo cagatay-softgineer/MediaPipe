@@ -1,49 +1,149 @@
 import mediapipe as mp
+from calculations import eDist, get_nodturn
+import lm_indices as ids
+import json # for messages
+import asyncio
+import websocket_util
+from test_hand import classify_hands_with_hand_lanmarks
+from util import parse_landmarks_data_with_regex,extract_coordinates
+import cv2
 
 # Initialize MediaPipe Hand module
 mp_pose = mp.solutions.pose
 mp_hands = mp.solutions.hands
 mp_face = mp.solutions.face_mesh
-face_mesh = mp_face.FaceMesh(static_image_mode=False, max_num_faces=1, min_detection_confidence=0.5)
+face_mesh = mp_face.FaceMesh(static_image_mode=False, max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.5, min_tracking_confidence=0.5)
 pose = mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5, min_tracking_confidence=0.5)
 hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
 # Initialize MediaPipe drawing module
 mp_drawing = mp.solutions.drawing_utils
 
-def detect_process(process_frame,output_frame):
+def detect_process(process_frame, output_frame, Send2WSS=False):
     """
     Detects and draws landmarks on the input frame.
 
+    This function processes the input frame to detect landmarks, such as facial features or hand points, 
+    and then draws these landmarks on the output frame. Optionally, the detected landmarks can be sent 
+    to a WebSocket server.
+
     Args:
-        process_frame (numpy.ndarray): Input frame to be processed.
-        output_frame (numpy.ndarray): Frame on which landmarks will be drawn.
+        process_frame (numpy.ndarray): 
+            Input frame to be processed. This frame is analyzed to detect landmarks.
+        output_frame (numpy.ndarray): 
+            Frame on which landmarks will be drawn. This is typically a copy of the input frame or 
+            a blank frame of the same dimensions.
+        Send2WSS (bool, optional): 
+            Flag indicating whether the detected landmarks should be sent to a WebSocket server. 
+            Default is False.
 
     Returns:
-        numpy.ndarray: Output frame with landmarks drawn.
+        numpy.ndarray: 
+            Output frame with landmarks drawn. This frame can be displayed or further processed.
     """
     
      # Process the frame to detect processes
     results = face_mesh.process(process_frame)
     pose_results = pose.process(process_frame)
     hand_results = hands.process(process_frame)
-
-    # Draw face landmarks on the frame
+    
+    
+    img_h, img_w, img_c = process_frame.shape
     if results.multi_face_landmarks:
-        for face_landmarks in results.multi_face_landmarks:
-            # Draw each face landmark
-                mp_drawing.draw_landmarks(
+      for face_landmarks in results.multi_face_landmarks:
+        
+        if face_landmarks:
+            # Calculate how big is gap between lips
+            #gap = abs(face_landmarks.landmark[ids.lips_upper].y - face_landmarks.landmark[ids.lips_bottom].y)
+            gap = eDist(face_landmarks.landmark[ids.lips_upper], face_landmarks.landmark[ids.lips_bottom])
+
+            # Calculate head Nod and Turn
+            nod, turn = get_nodturn(face_landmarks.landmark, img_w, img_h)
+
+            # Calculate head rotation
+            rot = face_landmarks.landmark[ids.face_upper].x - face_landmarks.landmark[ids.face_bottom].x
+
+            # Calculate Blinking
+            ed_R_h = eDist(face_landmarks.landmark[ids.eye_right_right], face_landmarks.landmark[ids.eye_right_left])
+            ed_R_v = eDist(face_landmarks.landmark[ids.eye_right_upper], face_landmarks.landmark[ids.eye_right_bottom])
+            blinkR = ed_R_v/ed_R_h
+            ed_L_h = eDist(face_landmarks.landmark[ids.eye_left_right], face_landmarks.landmark[ids.eye_left_left])
+            ed_L_v = eDist(face_landmarks.landmark[ids.eye_left_upper], face_landmarks.landmark[ids.eye_left_bottom])
+            blinkL = ed_L_v/ed_L_h
+            
+            eye_L_h = eDist(face_landmarks.landmark[ids.iris_left], face_landmarks.landmark[ids.eye_left_left]) / eDist(face_landmarks.landmark[ids.eye_left_right], face_landmarks.landmark[ids.eye_left_left])
+
+
+            eye_R_h = eDist(face_landmarks.landmark[ids.iris_right], face_landmarks.landmark[ids.eye_right_left]) / eDist(face_landmarks.landmark[ids.eye_right_right], face_landmarks.landmark[ids.eye_right_left])
+
+            eye_L_v = eDist(face_landmarks.landmark[ids.iris_left], face_landmarks.landmark[ids.eye_left_bottom]) / eDist(face_landmarks.landmark[ids.eye_left_upper], face_landmarks.landmark[ids.eye_left_bottom])
+
+            eye_R_v = eDist(face_landmarks.landmark[ids.iris_right], face_landmarks.landmark[ids.eye_right_bottom]) / eDist(face_landmarks.landmark[ids.eye_right_upper], face_landmarks.landmark[ids.eye_right_bottom])
+
+            #Draw each face landmark
+            mp_drawing.draw_landmarks(
                 output_frame, face_landmarks, mp_face.FACEMESH_TESSELATION)
+
 
     # Draw pose landmarks on the frame
     if pose_results.pose_landmarks:
         mp_drawing.draw_landmarks(
             output_frame, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-
+        
+    Left_Hand_landmarks = [None]
+    Right_Hand_landmarks = [None]
+    
     # Draw hand landmarks on the frame
     if hand_results.multi_hand_landmarks:
         for hand_landmarks in hand_results.multi_hand_landmarks:
-            mp_drawing.draw_landmarks(
-                output_frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+           
+            hand_label = classify_hands_with_hand_lanmarks(hand_landmarks)
             
+            if hand_label=="Left hand":
+                    mp_drawing.draw_landmarks(
+                        output_frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,landmark_drawing_spec=mp_drawing.DrawingSpec(color=(255, 0, 0), thickness=2, circle_radius=2))
+                    Left_Hand_landmarks = parse_landmarks_data_with_regex([f"{hand_landmarks}"])
+                    
+            elif hand_label=="Right hand":
+                    mp_drawing.draw_landmarks(
+                        output_frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2))
+                    Right_Hand_landmarks = parse_landmarks_data_with_regex([f"{hand_landmarks}"])
+                    
+    if Left_Hand_landmarks[0] is not None:
+        Lhw_x,Lhw_y,Lhw_z = extract_coordinates(Left_Hand_landmarks[0])
+    else:
+        Lhw_x,Lhw_y,Lhw_z = 0,0,0
+    if Right_Hand_landmarks[0] is not None:
+        Rhw_x,Rhw_y,Rhw_z = extract_coordinates(Right_Hand_landmarks[0])
+    else:
+        Rhw_x,Rhw_y,Rhw_z = 0,0,0    
+        
+    Lhw_x,Lhw_y,Lhw_z = int(Lhw_x*img_w),int(Lhw_y*img_h),Lhw_z
+    Rhw_x,Rhw_y,Rhw_z = int(Rhw_x*img_w),int(Rhw_y*img_h),Rhw_z
+    
+    cv2.circle(output_frame, (Lhw_x,Lhw_y), 15, (255, 0, 0), 2)
+    cv2.circle(output_frame, (Rhw_x,Rhw_y), 15, (0, 0, 255), 2)
+    
+    if face_landmarks and results.multi_face_landmarks and pose_results.pose_landmarks and hand_results.multi_hand_landmarks and Send2WSS:
+        msg = json.dumps({
+                'gap': gap, 
+                'rot': rot, 
+                'nod': nod, 
+                'turn': turn, 
+                'blinkR': blinkR, 
+                'blinkL': blinkL,
+                'eye_L_H': eye_L_h,
+                'eye_R_H': eye_R_h,
+                'eye_L_V': eye_L_v,
+                'eye_R_V': eye_R_v,
+                'Left_Hand_Wrist_Pos': f"{Lhw_x} | {Lhw_y} | {Lhw_z}",
+                'Right_hand_Wrist_Pos': f"{Rhw_x} | {Rhw_y} | {Rhw_z}"
+                }) # Velmi to taha dole FPS
+
+        # Send data to ws server
+        try:
+          asyncio.run(websocket_util.send(msg))
+        except ConnectionRefusedError:
+          print('WS Server is down')
+                
     return output_frame

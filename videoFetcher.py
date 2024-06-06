@@ -11,6 +11,25 @@ base_video_url = "https://www.cmpe.boun.edu.tr/tid/videos/mp4/"
 os.makedirs('videos', exist_ok=True)
 
 def sanitize_filename(name):
+    """
+    Sanitizes a string to make it suitable for use as a file name.
+
+    This function removes characters that are not allowed in file names according to
+    common file system conventions. It replaces characters such as '<', '>', ':', '"', 
+    '/', '\\', '|', '?', and '*' with an empty string.
+
+    Args:
+        name (str): The input string to be sanitized.
+
+    Returns:
+        str: The sanitized string suitable for use as a file name.
+
+    Example:
+        >>> filename = "my<file>:name?*"
+        >>> sanitized_filename = sanitize_filename(filename)
+        >>> print(sanitized_filename)
+        "myfilename"
+    """
     # Remove invalid characters for file names
     return re.sub(r'[<>:"/\\|?*]', '', name)
 
