@@ -81,7 +81,7 @@
 
 # Customization
  - You can customize the screen width and height in the `useMediaPipe` function to adjust the size of the displayed frames.
- - Additional customization can be done by modifying the code in `useMediaPipe.py` according to your requirements.
+ - Additional customization can be done by modifying the code in `modelUsageTests.py` according to your requirements.
 
 # License
  This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
