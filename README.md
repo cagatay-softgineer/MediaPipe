@@ -52,9 +52,9 @@
 # WebSocket Usage
  1. Start the WebSocket Server:
 
-  -Navigate to the WebSocketServer folder.
+  - Navigate to the WebSocketServer folder.
   ### FOR WINDOWS
-  -Run the executable `websoc.exe` file to start the WebSocket server.
+  - Run the executable `websoc.exe` file to start the WebSocket server.
   ### FOR MACOS OR LINUX
   - Create a script for run websocket.py
   ```
