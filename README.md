@@ -51,6 +51,7 @@
 
 # WebSocket Usage
  1. Start the WebSocket Server:
+ ------
 
   - Navigate to the WebSocketServer folder.
   ### FOR WINDOWS
@@ -75,6 +76,7 @@
   ```
 
  2. Add `Send2WSS=True` to:
+ ------
   - useMediaPipe("videos/Test.mp4",Send2WSS=True)
 
 # Customization
