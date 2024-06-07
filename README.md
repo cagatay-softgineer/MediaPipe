@@ -50,8 +50,7 @@
  3. Press 'q' to exit the program.
 
 # WebSocket Usage
- 1. Start the WebSocket Server:
- ------
+ ## 1. Start the WebSocket Server:
 
   - Navigate to the WebSocketServer folder.
   ### FOR WINDOWS
@@ -75,8 +74,7 @@
   ./run_websoc.sh
   ```
 
- 2. Add `Send2WSS=True` to:
- ------
+ ## 2. Add `Send2WSS=True` to:
   - useMediaPipe("videos/Test.mp4",Send2WSS=True)
 
 # Customization
