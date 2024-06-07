@@ -54,7 +54,27 @@
  1. Start the WebSocket Server:
 
   -Navigate to the WebSocketServer folder.
-  -Run the batch file to start the WebSocket server.
+  ### FOR WINDOWS
+  -Run the executable `websoc.exe` file to start the WebSocket server.
+  ### FOR MACOS OR LINUX
+  - Create a script for run websocket.py
+  ```
+  python3 websoc.py # Use python if not working with python3
+  ```
+  - Save the file with a `.sh` extension, for example `run_websoc.sh`
+  - Make the Script 
+  
+  + Open Terminal.
+  + Navigate to the directory where you saved run_websoc.sh.
+  + Make the script executable by running the following command
+  ```
+  chmod +x run_websoc.sh
+  ```
+  - Run the Script
+  ```
+  ./run_websoc.sh
+  ```
+
  2. Add `Send2WSS=True` to:
   - useMediaPipe("videos/Test.mp4",Send2WSS=True)
 
