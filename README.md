@@ -75,7 +75,9 @@
   ```
 
  ## 2. Add `Send2WSS=True` to:
-  - useMediaPipe("videos/Test.mp4",Send2WSS=True)
+  ```
+  useMediaPipe("videos/Test.mp4",Send2WSS=True)
+  ```
 
 # Customization
  - You can customize the screen width and height in the `useMediaPipe` function to adjust the size of the displayed frames.
