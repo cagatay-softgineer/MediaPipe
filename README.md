@@ -41,13 +41,18 @@
 
 # Usage
  1. Place your video files in the `videos` directory.
- 2. Run the `main.py` script:
+ 2. Update the Video Path in `main.py.`
+ 
+  ```
+  useMediaPipe("videos/Test.mp4")
+  ```
+ 3. Run the `main.py` script:
 
  ```
  python main.py
  ```
 
- 3. Press 'q' to exit the program.
+ 4. Press 'q' to exit the program.
 
 # WebSocket Usage
  ## 1. Start the WebSocket Server:
