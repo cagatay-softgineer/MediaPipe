@@ -41,10 +41,10 @@
 
 # Usage
  1. Place your video files in the `videos` directory.
- 2. Run the `useMediaPipe.py` script:
+ 2. Run the `main.py` script:
 
  ```
- python useMediaPipe.py
+ python main.py
  ```
 
  3. Press 'q' to exit the program.
