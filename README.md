@@ -7,7 +7,7 @@
 - Python: 39622 bytes
 - HTML: 2905 bytes
 - Jupyter Notebook: 691 bytes
-### Total Size Of Project : 13469 kilobytes
+### Total Size Of Project : 13430 kilobytes
 ### Total Lines Of Code : 1294
 
 # End of Language Stats
