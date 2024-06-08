@@ -93,5 +93,7 @@
 
 # Acknowledgments
 ### This project utilizes the following third-party applications and libraries
- - MediaPipe library developed by Google. [![alt text](https://www.gstatic.com/devrel-devsite/prod/v2ce49398fbedb6586ec054c8c0e071251fec28eb36277100a1795e671ae7c694/googledevai/images/lockup-new.svg)](https://ai.google.dev/edge/mediapipe/solutions)
- - Blender [![alt text](https://www.blender.org/wp-content/uploads/2020/07/blender_logo_no_socket_white-1280x391.png)](https://www.blender.org/)
+#### - MediaPipe library developed by Google. 
+[![alt text](https://www.gstatic.com/devrel-devsite/prod/v2ce49398fbedb6586ec054c8c0e071251fec28eb36277100a1795e671ae7c694/googledevai/images/lockup-new.svg)](https://ai.google.dev/edge/mediapipe/solutions)
+#### - Blender 
+[![alt text](https://www.blender.org/wp-content/uploads/2020/07/blender_logo_no_socket_white-1280x391.png)](https://www.blender.org/)
