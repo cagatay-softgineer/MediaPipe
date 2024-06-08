@@ -95,4 +95,4 @@
  - This project uses the MediaPipe library developed by Google.
  - [![alt text](https://www.gstatic.com/devrel-devsite/prod/v2ce49398fbedb6586ec054c8c0e071251fec28eb36277100a1795e671ae7c694/googledevai/images/lockup-new.svg)](https://ai.google.dev/edge/mediapipe/solutions)
  - This project uses the Blender
- - [![alt text](https://docs.blender.org/api/current/_static/blender_logo.svg)](https://www.blender.org/)
+ - [![alt text](https://www.blender.org/wp-content/uploads/2020/07/blender_logo_no_socket_white-1280x391.png)](https://www.blender.org/)
