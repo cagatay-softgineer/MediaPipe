@@ -36,7 +36,7 @@
  2. Install the required libraries:
 
  ```
- pip install opencv-python mediapipe
+ pip install opencv-python mediapipe websockets
  ```
 
 # Usage
