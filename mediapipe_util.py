@@ -93,13 +93,12 @@ def detect_process(process_frame, output_frame, Send2WSS=False):
         len_hand_constants_names = len(ids.hand_constants_names)-1
         # Iterate over all possible landmarks
         for landmark_id in ids.hand_constants:
-            # Check if the landmark is available for left and right hands
-            left_hand_coordinate = Left_Hands_landmark_coordinates[landmark_id] if landmark_id < len(Left_Hands_landmark_coordinates) else None
-            right_hand_coordinate = Right_Hands_landmark_coordinates[landmark_id] if landmark_id < len(Right_Hands_landmark_coordinates) else None
+            # Check if the landmark is available for left hands
+            landmark_coordinates[f"Left_Hand_{ids.hand_constants_names[min(landmark_id,len_hand_constants_names)]}_Pose"] = Left_Hands_landmark_coordinates[landmark_id] if landmark_id < len(Left_Hands_landmark_coordinates) else None
 
-            # Add the coordinates to the landmark_coordinates dictionary
-            landmark_coordinates[f"Left_Hand_{ids.hand_constants_names[min(landmark_id,len_hand_constants_names)]}_Pose"] = left_hand_coordinate
-            landmark_coordinates[f"Right_Hand_{ids.hand_constants_names[min(landmark_id,len_hand_constants_names)]}_Pose"] = right_hand_coordinate
+        for landmark_id in ids.hand_constants:
+            # Check if the landmark is available for right hands
+            landmark_coordinates[f"Right_Hand_{ids.hand_constants_names[min(landmark_id,len_hand_constants_names)]}_Pose"] = Right_Hands_landmark_coordinates[landmark_id] if landmark_id < len(Right_Hands_landmark_coordinates) else None
 
         # Add the landmark coordinates to the data dictionary
         G_var.DATA.update(landmark_coordinates)

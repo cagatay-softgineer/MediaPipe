@@ -224,11 +224,12 @@ def extract_coordinates_with_max_possible(landmark):
     
     
     for i in range(min(num_landmarks, max_landmark_index + 1)):
-        if i in ids.hand_constants:
+        if i in ids.hand_constants and i < len(landmark):
             x, y, z = 0, 0, 0  # Default values if landmark not present
-            if i < len(landmark) and landmark[i] is not None:  # Check if the landmark is not None
+            if landmark[i] is not None:  # Check if the landmark is not None
                 x, y, z = extract_coordinates(landmark[i])
-            landmark_coordinates.append((x, y, z))
+            if x != 0 and y != 0 and z != 0:
+                landmark_coordinates.append((x, y, z))
     return landmark_coordinates
 
 def draw_circle_on_coord(input_frame,landmark_coordinates,COLOR_DOTS):
