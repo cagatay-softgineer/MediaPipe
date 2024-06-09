@@ -1,4 +1,4 @@
-GAP = None
+EYES_DISTANCE = None
 ROT = None
 NOD = None
 TURN = None
@@ -12,3 +12,8 @@ ED_R_H = None
 ED_R_V = None
 ED_L_H = None
 ED_L_V = None
+NOSE_2_CHIN_DIST = None
+MOUTH_OPNG_ANGLE = None
+EYE_2_CHIN_RATIO = None
+
+DATA = {}

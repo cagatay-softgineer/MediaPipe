@@ -1,5 +1,5 @@
 import mediapipe as mp
-from calculations import eDist, get_nodturn
+from calculations import analyze_face_landmarks
 import lm_indices as ids
 import gloabal_vars as G_var
 import json # for messages
@@ -7,7 +7,6 @@ import asyncio
 import websocket_util
 from test_hand import classify_hands_with_hand_lanmarks
 from util import parse_landmarks_data_with_regex,extract_coordinates_with_max_possible,draw_circle_on_coord
-
 
 # Initialize MediaPipe Hand module
 mp_drawing = mp.solutions.drawing_utils
@@ -53,35 +52,17 @@ def detect_process(process_frame, output_frame, Send2WSS=False):
       for face_landmarks in results.multi_face_landmarks:
         
         if face_landmarks:
-            # Calculate how big is gap between lips
-            #gap = abs(face_landmarks.landmark[ids.lips_upper].y - face_landmarks.landmark[ids.lips_bottom].y)
-            G_var.GAP = eDist(face_landmarks.landmark[ids.lips_upper], face_landmarks.landmark[ids.lips_bottom])
-            G_var.NOD, G_var.TURN = get_nodturn(face_landmarks.landmark, img_w, img_h)
-            G_var.ROT = face_landmarks.landmark[ids.face_upper].x - face_landmarks.landmark[ids.face_bottom].x
-
-            G_var.ED_R_H = eDist(face_landmarks.landmark[ids.eye_right_right], face_landmarks.landmark[ids.eye_right_left])
-            G_var.ED_R_V = eDist(face_landmarks.landmark[ids.eye_right_upper], face_landmarks.landmark[ids.eye_right_bottom])
-            G_var.BLINKR = G_var.ED_R_V / G_var.ED_R_H
-
-            G_var.ED_L_H = eDist(face_landmarks.landmark[ids.eye_left_right], face_landmarks.landmark[ids.eye_left_left])
-            G_var.ED_L_V = eDist(face_landmarks.landmark[ids.eye_left_upper], face_landmarks.landmark[ids.eye_left_bottom])
-            G_var.BLINKL = G_var.ED_L_V / G_var.ED_L_H
-
-            G_var.EYE_L_H = eDist(face_landmarks.landmark[ids.iris_left], face_landmarks.landmark[ids.eye_left_left]) / G_var.ED_L_H
-            G_var.EYE_R_H = eDist(face_landmarks.landmark[ids.iris_right], face_landmarks.landmark[ids.eye_right_left]) / G_var.ED_R_H
-
-            G_var.EYE_L_V = eDist(face_landmarks.landmark[ids.iris_left], face_landmarks.landmark[ids.eye_left_bottom]) / G_var.ED_L_V
-            G_var.EYE_R_V = eDist(face_landmarks.landmark[ids.iris_right], face_landmarks.landmark[ids.eye_right_bottom]) / G_var.ED_R_V
-
+            
+            G_var.DATA = analyze_face_landmarks(face_landmarks,img_w,img_h)
+            
             #Draw each face landmark
             mp_drawing.draw_landmarks(
-                output_frame, face_landmarks, mp_face.FACEMESH_TESSELATION,landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0)))
-
+                output_frame, face_landmarks, mp_face.FACEMESH_TESSELATION,landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=1, circle_radius=1),connection_drawing_spec=mp_drawing.DrawingSpec(color=(63, 127, 63),thickness=1, circle_radius=1))
 
     # Draw pose landmarks on the frame
     if pose_results.pose_landmarks:
         mp_drawing.draw_landmarks(
-            output_frame, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS,landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0)))
+            output_frame, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS,landmark_drawing_spec=mp_drawing.DrawingSpec(color=(255, 127, 255), thickness=1, circle_radius=2),connection_drawing_spec=mp_drawing.DrawingSpec(color=(127, 63, 127),thickness=1, circle_radius=1))
         
     Left_Hand_landmarks = [None]
     Right_Hand_landmarks = [None]
@@ -94,33 +75,18 @@ def detect_process(process_frame, output_frame, Send2WSS=False):
             
             if hand_label=="Left hand":
                     mp_drawing.draw_landmarks(
-                        output_frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,landmark_drawing_spec=mp_drawing.DrawingSpec(color=(255, 0, 0), thickness=2, circle_radius=2))
+                        output_frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,landmark_drawing_spec=mp_drawing.DrawingSpec(color=(255, 0, 0), thickness=1, circle_radius=1),connection_drawing_spec=mp_drawing.DrawingSpec(color=(127, 63, 63),thickness=1, circle_radius=1))
                     Left_Hand_landmarks = parse_landmarks_data_with_regex([f"{hand_landmarks}"])
                     
             elif hand_label=="Right hand":
                     mp_drawing.draw_landmarks(
-                        output_frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2))
+                        output_frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=1, circle_radius=1),connection_drawing_spec=mp_drawing.DrawingSpec(color=(63, 63, 127),thickness=1, circle_radius=1))
                     Right_Hand_landmarks = parse_landmarks_data_with_regex([f"{hand_landmarks}"])
-                    
-
     
     Left_Hands_landmark_coordinates = extract_coordinates_with_max_possible(Left_Hand_landmarks)
     Right_Hands_landmark_coordinates = extract_coordinates_with_max_possible(Right_Hand_landmarks)
     output_frame = draw_circle_on_coord(output_frame,Left_Hands_landmark_coordinates,COLOR_DOTS=(255, 0, 0))
     output_frame = draw_circle_on_coord(output_frame,Right_Hands_landmark_coordinates,COLOR_DOTS=(0, 0, 255))
-    
-    data = {
-    'gap': G_var.GAP, 
-    'rot': G_var.ROT, 
-    'nod': G_var.NOD, 
-    'turn': G_var.TURN, 
-    'blinkR': G_var.BLINKR, 
-    'blinkL': G_var.BLINKR,
-    'eye_L_H': G_var.EYE_L_H,
-    'eye_R_H': G_var.EYE_R_H,
-    'eye_L_V': G_var.EYE_L_V,
-    'eye_R_V': G_var.EYE_R_V
-    }
     
     if Send2WSS:
         landmark_coordinates = {}
@@ -136,17 +102,15 @@ def detect_process(process_frame, output_frame, Send2WSS=False):
             landmark_coordinates[f"Right_Hand_{ids.hand_constants_names[min(landmark_id,len_hand_constants_names)]}_Pose"] = right_hand_coordinate
 
         # Add the landmark coordinates to the data dictionary
-        data.update(landmark_coordinates)
+        G_var.DATA.update(landmark_coordinates)
 
         # Prepare the JSON message with all data
-        msg = json.dumps(data) # Velmi to taha dole FPS
+        msg = json.dumps(G_var.DATA) # Velmi to taha dole FPS
 
         # Send data to ws server
-
         try:
           asyncio.run(websocket_util.send(msg))
         except ConnectionRefusedError:
           print('WS Server is down')
-
                 
     return output_frame

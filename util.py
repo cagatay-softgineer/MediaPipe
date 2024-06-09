@@ -244,5 +244,5 @@ def draw_circle_on_coord(input_frame,landmark_coordinates,COLOR_DOTS):
                 # Check if both x and y coordinates are not None
                 if x is not None and y is not None:
                     # Draw a circle
-                    cv2.circle(output_frame, (int(x*input_frame.shape[ids.W]), int(y*input_frame.shape[ids.H])), 15, COLOR_DOTS, 2)
+                    cv2.circle(output_frame, (int(x*input_frame.shape[ids.W]), int(y*input_frame.shape[ids.H])), 10, COLOR_DOTS, 1)
     return output_frame
