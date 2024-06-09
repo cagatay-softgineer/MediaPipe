@@ -1,8 +1,9 @@
 import cv2
 from util import get_video_name, resize_to_fullscreen
 from mediapipe_util import detect_process
+import time
 
-def useMediaPipe(video_path = 'videos/Beyaz.mp4',screen_width = 1920, screen_height = 1000, Send2WSS=False):
+def useMediaPipe(video_path = 'test_media/video.mp4',screen_width = 1920, screen_height = 1000, Send2WSS=False):
     """
     Process a video using MediaPipe to detect and annotate poses, hands, and face landmarks.
 
@@ -15,12 +16,15 @@ def useMediaPipe(video_path = 'videos/Beyaz.mp4',screen_width = 1920, screen_hei
     Returns:
         None
     """
-    cap = cv2.VideoCapture(video_path)
+    cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    frame_time = 1 / fps
 
     # Get video name without extension
     video_name = get_video_name(video_path)
 
     while True:
+        start_time = time.time()
         success, frame = cap.read()
         if not success:
             # If the video has ended, reset to the beginning
@@ -38,6 +42,16 @@ def useMediaPipe(video_path = 'videos/Beyaz.mp4',screen_width = 1920, screen_hei
         cv2.putText(frame_resized, video_name, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
         # Display the frame
         cv2.imshow('Pose and Hand and Face Blendshapes Landmarks', frame_resized)
+        
+        elapsed_time = time.time() - start_time
+        if elapsed_time < frame_time:
+            sleep_time = frame_time - elapsed_time
+            time.sleep(sleep_time)
+        else:
+            # Skip frames if processing is slower than real-time
+            while elapsed_time > frame_time:
+                cap.grab()  # Grab the next frame without decoding
+                elapsed_time -= frame_time
 
         # Break the loop on 'q' key press
         if cv2.waitKey(1) & 0xFF == ord('q'):

@@ -56,29 +56,22 @@ def detect_process(process_frame, output_frame, Send2WSS=False):
             # Calculate how big is gap between lips
             #gap = abs(face_landmarks.landmark[ids.lips_upper].y - face_landmarks.landmark[ids.lips_bottom].y)
             G_var.GAP = eDist(face_landmarks.landmark[ids.lips_upper], face_landmarks.landmark[ids.lips_bottom])
-
-            # Calculate head Nod and Turn
             G_var.NOD, G_var.TURN = get_nodturn(face_landmarks.landmark, img_w, img_h)
-
-            # Calculate head rotation
             G_var.ROT = face_landmarks.landmark[ids.face_upper].x - face_landmarks.landmark[ids.face_bottom].x
 
-            # Calculate Blinking
             G_var.ED_R_H = eDist(face_landmarks.landmark[ids.eye_right_right], face_landmarks.landmark[ids.eye_right_left])
             G_var.ED_R_V = eDist(face_landmarks.landmark[ids.eye_right_upper], face_landmarks.landmark[ids.eye_right_bottom])
-            G_var.BLINKR = G_var.ED_R_V/G_var.ED_R_H
-            
+            G_var.BLINKR = G_var.ED_R_V / G_var.ED_R_H
+
             G_var.ED_L_H = eDist(face_landmarks.landmark[ids.eye_left_right], face_landmarks.landmark[ids.eye_left_left])
             G_var.ED_L_V = eDist(face_landmarks.landmark[ids.eye_left_upper], face_landmarks.landmark[ids.eye_left_bottom])
-            G_var.BLINKL = G_var.ED_L_V/G_var.ED_L_H
-            
-            G_var.EYE_L_H = eDist(face_landmarks.landmark[ids.iris_left], face_landmarks.landmark[ids.eye_left_left]) / eDist(face_landmarks.landmark[ids.eye_left_right], face_landmarks.landmark[ids.eye_left_left])
+            G_var.BLINKL = G_var.ED_L_V / G_var.ED_L_H
 
-            G_var.EYE_R_H = eDist(face_landmarks.landmark[ids.iris_right], face_landmarks.landmark[ids.eye_right_left]) / eDist(face_landmarks.landmark[ids.eye_right_right], face_landmarks.landmark[ids.eye_right_left])
+            G_var.EYE_L_H = eDist(face_landmarks.landmark[ids.iris_left], face_landmarks.landmark[ids.eye_left_left]) / G_var.ED_L_H
+            G_var.EYE_R_H = eDist(face_landmarks.landmark[ids.iris_right], face_landmarks.landmark[ids.eye_right_left]) / G_var.ED_R_H
 
-            G_var.EYE_L_V = eDist(face_landmarks.landmark[ids.iris_left], face_landmarks.landmark[ids.eye_left_bottom]) / eDist(face_landmarks.landmark[ids.eye_left_upper], face_landmarks.landmark[ids.eye_left_bottom])
-
-            G_var.EYE_R_V = eDist(face_landmarks.landmark[ids.iris_right], face_landmarks.landmark[ids.eye_right_bottom]) / eDist(face_landmarks.landmark[ids.eye_right_upper], face_landmarks.landmark[ids.eye_right_bottom])
+            G_var.EYE_L_V = eDist(face_landmarks.landmark[ids.iris_left], face_landmarks.landmark[ids.eye_left_bottom]) / G_var.ED_L_V
+            G_var.EYE_R_V = eDist(face_landmarks.landmark[ids.iris_right], face_landmarks.landmark[ids.eye_right_bottom]) / G_var.ED_R_V
 
             #Draw each face landmark
             mp_drawing.draw_landmarks(
